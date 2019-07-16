@@ -135,7 +135,7 @@ void GSDevice11::SetupVS(VSSelector sel, const VSConstantBuffer* cb)
 	{
 		ID3D11DeviceContext* ctx = m_ctx;
 
-		ctx->UpdateSubresource(m_vs_cb, 0, NULL, cb, 0, 0);
+		ctx->UpdateSubresource(m_vs_cb, 0, nullptr, cb, 0, 0);
 	}
 
 	VSSetShader(i->second.vs, m_vs_cb);
@@ -178,7 +178,7 @@ void GSDevice11::SetupGS(GSSelector sel, const GSConstantBuffer* cb)
 	{
 		ID3D11DeviceContext* ctx = m_ctx;
 
-		ctx->UpdateSubresource(m_gs_cb, 0, NULL, cb, 0, 0);
+		ctx->UpdateSubresource(m_gs_cb, 0, nullptr, cb, 0, 0);
 	}
 
 	GSSetShader(gs, m_gs_cb);
@@ -239,7 +239,7 @@ void GSDevice11::SetupPS(PSSelector sel, const PSConstantBuffer* cb, PSSamplerSe
 	{
 		ID3D11DeviceContext* ctx = m_ctx;
 
-		ctx->UpdateSubresource(m_ps_cb, 0, NULL, cb, 0, 0);
+		ctx->UpdateSubresource(m_ps_cb, 0, nullptr, cb, 0, 0);
 	}
 
 	CComPtr<ID3D11SamplerState> ss0, ss1;
@@ -259,22 +259,25 @@ void GSDevice11::SetupPS(PSSelector sel, const PSConstantBuffer* cb, PSSamplerSe
 		}
 		else
 		{
-			D3D11_SAMPLER_DESC sd, af;
+			D3D11_SAMPLER_DESC sampler_desc = {};
+			D3D11_SAMPLER_DESC aniso_filter;
 
-			memset(&sd, 0, sizeof(sd));
+			aniso_filter.Filter = theApp.GetConfigI("MaxAnisotropy") && !theApp.GetConfigB("paltex") ? D3D11_FILTER_ANISOTROPIC : D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+			sampler_desc.Filter = ssel.ltf ? aniso_filter.Filter : D3D11_FILTER_MIN_MAG_MIP_POINT;
 
-			af.Filter = theApp.GetConfigI("MaxAnisotropy") && !theApp.GetConfigB("paltex") ? D3D11_FILTER_ANISOTROPIC : D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-			sd.Filter = ssel.ltf ? af.Filter : D3D11_FILTER_MIN_MAG_MIP_POINT;
+			sampler_desc.AddressU = ssel.tau ? D3D11_TEXTURE_ADDRESS_WRAP : D3D11_TEXTURE_ADDRESS_CLAMP;
+			sampler_desc.AddressV = ssel.tav ? D3D11_TEXTURE_ADDRESS_WRAP : D3D11_TEXTURE_ADDRESS_CLAMP;
+			sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+			sampler_desc.MinLOD = -FLT_MAX;
+			sampler_desc.MaxLOD = FLT_MAX;
+			sampler_desc.MaxAnisotropy = theApp.GetConfigI("MaxAnisotropy");
+			sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 
-			sd.AddressU = ssel.tau ? D3D11_TEXTURE_ADDRESS_WRAP : D3D11_TEXTURE_ADDRESS_CLAMP;
-			sd.AddressV = ssel.tav ? D3D11_TEXTURE_ADDRESS_WRAP : D3D11_TEXTURE_ADDRESS_CLAMP;
-			sd.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-			sd.MinLOD = -FLT_MAX;
-			sd.MaxLOD = FLT_MAX;
-			sd.MaxAnisotropy = theApp.GetConfigI("MaxAnisotropy");
-			sd.ComparisonFunc = D3D11_COMPARISON_NEVER;
+			HRESULT hr;
 
-			m_dev->CreateSamplerState(&sd, &ss0);
+			hr = m_dev->CreateSamplerState(&sampler_desc, &ss0);
+
+			if (FAILED(hr)) throw GSDXRecoverableError();
 
 			m_ps_ss[ssel] = ss0;
 		}
