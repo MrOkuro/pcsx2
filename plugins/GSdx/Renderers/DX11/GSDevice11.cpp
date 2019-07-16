@@ -1258,26 +1258,24 @@ void GSDevice11::IASetIndexBuffer(const void* index, size_t count)
 	if(count > m_index.limit)
 	{
 		m_ib_old = m_ib;
-		m_ib = NULL;
+		m_ib = nullptr;
 
 		m_index.start = 0;
 		m_index.limit = std::max<int>(count * 3 / 2, 11000);
 	}
 
-	if(m_ib == NULL)
+	if(m_ib == nullptr)
 	{
-		D3D11_BUFFER_DESC bd;
+		D3D11_BUFFER_DESC buffer_desc = {};
 
-		memset(&bd, 0, sizeof(bd));
-
-		bd.Usage = D3D11_USAGE_DYNAMIC;
-		bd.ByteWidth = m_index.limit * sizeof(uint32);
-		bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
+		buffer_desc.ByteWidth = m_index.limit * sizeof(uint32);
+		buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 		HRESULT hr;
 
-		hr = m_dev->CreateBuffer(&bd, NULL, &m_ib);
+		hr = m_dev->CreateBuffer(&buffer_desc, nullptr, &m_ib);
 
 		if(FAILED(hr)) return;
 	}
