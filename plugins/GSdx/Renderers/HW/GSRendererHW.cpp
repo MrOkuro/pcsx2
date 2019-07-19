@@ -1464,6 +1464,7 @@ GSRendererHW::Hacks::Hacks()
 	, m_oo(NULL)
 	, m_cu(NULL)
 {
+	m_oi_list.push_back(HackEntry<OI_Ptr>(CRC::BigMuthaTruckers, CRC::RegionCount, &GSRendererHW::OI_BigMuthaTruckers));
 	m_oi_list.push_back(HackEntry<OI_Ptr>(CRC::FFXII, CRC::EU, &GSRendererHW::OI_FFXII));
 	m_oi_list.push_back(HackEntry<OI_Ptr>(CRC::FFX, CRC::RegionCount, &GSRendererHW::OI_FFX));
 	m_oi_list.push_back(HackEntry<OI_Ptr>(CRC::MetalSlug6, CRC::RegionCount, &GSRendererHW::OI_MetalSlug6));
@@ -1688,6 +1689,27 @@ bool GSRendererHW::OI_BlitFMV(GSTextureCache::Target* _rt, GSTextureCache::Sourc
 }
 
 // OI (others input?/implementation?) hacks replace current draw call
+
+bool GSRendererHW::OI_BigMuthaTruckers(GSTexture* rt, GSTexture* ds, GSTextureCache::Source* t)
+{
+	GIFRegTEX0 Texture = m_context->TEX0;
+
+	GIFRegTEX0 Frame;
+	Frame.TBW = m_context->FRAME.FBW;
+	Frame.TBP0 = m_context->FRAME.FBP;
+	Frame.TBP0 = m_context->FRAME.Block();
+	Frame.PSM = m_context->FRAME.PSM;
+
+
+	if (PRIM->TME && Frame.TBW == 10 && Texture.TBW == 10 && Frame.TBP0 == 0xa00 && Texture.PSM == PSM_PSMT8H && (m_r.y == 256 || m_r.y == 224))
+	{
+		// 224 ntsc, 256 pal.
+		GL_INS("OI_BigMuthaTruckers, detect");
+		return false; // skip draw temporarily
+	}
+
+	return true;
+}
 
 bool GSRendererHW::OI_FFXII(GSTexture* rt, GSTexture* ds, GSTextureCache::Source* t)
 {
