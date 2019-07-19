@@ -42,16 +42,10 @@ bool GSC_BigMuthaTruckers(const GSFrameInfo& fi, int& skip)
 {
 	if(skip == 0)
 	{
-		if(fi.TME && (fi.FBP == 0x00000 || fi.FBP == 0x00a00) && fi.FPSM == fi.TPSM && fi.TPSM == PSM_PSMCT16)
+		if(fi.TME && (fi.TBP0 == 0x1400 || fi.TBP0 == 0x12c0) && fi.FPSM == fi.TPSM && fi.TPSM == PSM_PSMCT16)
 		{
-			// A real mess.
-			// Half screen bottom and vertical stripes issues.
-			//
-			// HDR colclip/conclip not supported,
-			// Depth target lookup,
-			// Texture shuffle and SW emulated fbmask.
-			// https://github.com/PCSX2/pcsx2/issues/2449
-			skip = 3;
+			// Misdetection of a texture shuffle, dst miss.
+			skip = 1;
 		}
 	}
 

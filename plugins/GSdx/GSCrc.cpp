@@ -301,6 +301,7 @@ CRC::Game CRC::m_games[] =
 	{0x22425C19, DemonStone, KO, 0},
 	{0x506644B3, BigMuthaTruckers, EU, 0},
 	{0x90F0D852, BigMuthaTruckers, US, 0},
+	{0x92624842, BigMuthaTruckers, US, 0},
 	{0x5CC9BF81, TimeSplitters2, EU, 0},
 	{0x12532F1C, TimeSplitters2, US, 0},
 	{0xEB198738, LordOfTheRingsThirdAge, US, 0},
